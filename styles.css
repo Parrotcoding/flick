@@ -460,13 +460,6 @@ body, html {
   line-height: 1.6;
 }
 
-.empty-msg .error-details {
-  margin-top: 12px;
-  font-size: 0.82rem;
-  color: rgba(248, 113, 113, 0.85);
-  word-break: break-word;
-}
-
 @media (max-width: 960px) {
   #app {
     grid-template-columns: 1fr;

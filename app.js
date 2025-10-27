@@ -10,9 +10,7 @@ const STORAGE_KEY = 'flick-display-name';
 const PRESENCE_INTERVAL = 8000;
 const CHUNK_SIZE = 64 * 1024; // 64 KiB
 
-const P2PT_SCRIPT_SRC = 'https://unpkg.com/p2pt@2.2.3/dist/p2pt.min.js';
-
-let p2pt;
+const p2pt = new P2PT(trackers, TOPIC, {trickle: true});
 
 const state = {
   me: {
@@ -46,11 +44,9 @@ const meAvatar = document.getElementById('me-avatar');
 
 let presenceTimer;
 
-initialize().catch(error => {
-  console.error('Flick failed to initialize', error);
-});
+initialize();
 
-async function initialize() {
+function initialize() {
   displayNameInput.value = state.me.name;
   updateAvatar(meAvatar, state.me.id, state.me.name);
   updateSelfStatus('connecting');
@@ -65,48 +61,10 @@ async function initialize() {
   });
   fileInput.addEventListener('change', handleFileSelected);
 
-  try {
-    const P2PTConstructor = await ensureP2PT();
-    p2pt = new P2PTConstructor(trackers, TOPIC, {trickle: true});
-    setupP2PT();
-  } catch (error) {
-    console.error('Unable to load P2PT library', error);
-    updateSelfStatus('error');
-    showDiscoveryFailureMessage(error);
-  }
-}
-
-async function ensureP2PT() {
-  const existing = window.P2PT || globalThis.P2PT;
-  if (existing) {
-    return existing;
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = P2PT_SCRIPT_SRC;
-    script.async = true;
-    script.onload = () => {
-      const loaded = window.P2PT || globalThis.P2PT;
-      if (loaded) {
-        resolve(loaded);
-      } else {
-        reject(new Error('P2PT script loaded but global constructor is missing.'));
-      }
-    };
-    script.onerror = () => {
-      reject(new Error('Failed to load P2PT script.'));
-    };
-    document.head.appendChild(script);
-  });
+  setupP2PT();
 }
 
 function setupP2PT() {
-  if (!p2pt) {
-    console.warn('Cannot set up P2PT before the constructor is ready.');
-    return;
-  }
-
   p2pt.on('trackerconnect', (_, tracker) => {
     updateSelfStatus('online');
     console.info('Connected to tracker', tracker.announce);
@@ -162,29 +120,6 @@ function setupP2PT() {
   broadcastPresence();
 }
 
-function showDiscoveryFailureMessage(error) {
-  peerList.classList.add('empty-state');
-  peerList.innerHTML = '';
-
-  const container = document.createElement('div');
-  container.className = 'empty-msg';
-
-  const heading = document.createElement('h3');
-  heading.textContent = 'Discovery offline';
-  container.appendChild(heading);
-
-  const message = document.createElement('p');
-  message.textContent = "We couldn't load the peer discovery library. Check your connection and refresh.";
-  container.appendChild(message);
-
-  const details = document.createElement('p');
-  details.className = 'error-details';
-  details.textContent = error?.message || 'Unknown error';
-  container.appendChild(details);
-
-  peerList.appendChild(container);
-}
-
 function handleNameChange(evt) {
   const name = evt.target.value.trim() || buildRandomName();
   state.me.name = name;
@@ -207,10 +142,6 @@ function updateSelfStatus(status) {
     selfStatus.textContent = 'unstable';
     selfStatus.style.background = 'rgba(250, 204, 21, 0.2)';
     selfStatus.style.color = '#facc15';
-  } else if (status === 'error') {
-    selfStatus.textContent = 'offline';
-    selfStatus.style.background = 'rgba(248, 113, 113, 0.2)';
-    selfStatus.style.color = '#f87171';
   } else {
     selfStatus.textContent = 'connecting…';
     selfStatus.style.background = 'rgba(148, 163, 184, 0.2)';
@@ -442,9 +373,6 @@ async function sendFileToPeer(peerId, file) {
 }
 
 function broadcastPresence() {
-  if (!p2pt) {
-    return;
-  }
   const payload = {
     type: 'presence',
     senderId: state.me.id,
@@ -455,9 +383,6 @@ function broadcastPresence() {
 }
 
 function broadcastPresenceTo(peerId) {
-  if (!p2pt) {
-    return;
-  }
   const payload = {
     type: 'presence',
     senderId: state.me.id,
@@ -478,10 +403,6 @@ function sendToPeer(peerId, payload) {
       console.warn('Direct send failed, falling back to broadcast channel', error);
     }
   }
-  if (!p2pt) {
-    console.warn('Cannot send payload, peer discovery is unavailable.');
-    return;
-  }
   try {
     p2pt.send(peerId, data);
   } catch (error) {
@@ -490,10 +411,6 @@ function sendToPeer(peerId, payload) {
 }
 
 function broadcast(payload) {
-  if (!p2pt) {
-    console.warn('Cannot broadcast payload, peer discovery is unavailable.');
-    return;
-  }
   try {
     p2pt.broadcast(JSON.stringify(payload));
   } catch (error) {
