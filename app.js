@@ -422,8 +422,13 @@ function handleIncomingData(peerId, message) {
   const peerInfo = ensurePeerEntry(peerId);
   peerInfo.status = 'online';
   peerInfo.lastSeen = Date.now();
-  peerInfo.element?.classList.remove('unavailable');
-  peerInfo.element?.querySelector('.peer-status').textContent = 'Online now';
+  if (peerInfo.element) {
+    peerInfo.element.classList.remove('unavailable');
+    const statusEl = peerInfo.element.querySelector('.peer-status');
+    if (statusEl) {
+      statusEl.textContent = 'Online now';
+    }
+  }
 
   switch (message.type) {
     case 'presence':
