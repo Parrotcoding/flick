@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flick - P2P Transfers</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">⚡️</div>
+        <div>
+          <h1>Flick</h1>
+          <p>LAN P2P Flicks</p>
+        </div>
+      </div>
+      <div class="me-card">
+        <div class="avatar" id="me-avatar"></div>
+        <div>
+          <input id="display-name" maxlength="24" />
+          <span class="status-pill" id="self-status">offline</span>
+        </div>
+      </div>
+      <div class="section-title">Nearby</div>
+      <div id="peer-list" class="peer-list empty-state">
+        <div class="empty-msg">
+          <h3>No peers yet</h3>
+          <p>Anyone on the same network visiting this page will appear here automatically.</p>
+        </div>
+      </div>
+    </aside>
+    <main class="workspace">
+      <header class="chat-header">
+        <div class="chat-peer-info" id="active-peer-info">
+          <div class="avatar large" id="active-peer-avatar"></div>
+          <div>
+            <h2 id="active-peer-name">No chat selected</h2>
+            <p id="active-peer-status">Select a peer from the sidebar to start</p>
+          </div>
+        </div>
+        <div class="notifications" id="notification-tray"></div>
+      </header>
+      <section class="chat-window" id="chat-window">
+        <div class="chat-placeholder" id="chat-placeholder">
+          <h2>Start Flicking</h2>
+          <p>Select a peer to chat and share files instantly.</p>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+      </section>
+      <footer class="composer" id="composer" hidden>
+        <div class="composer-actions">
+          <label class="file-button" for="file-input">
+            <input type="file" id="file-input" hidden />
+            <span>📎</span>
+          </label>
+        </div>
+        <input type="text" id="message-input" placeholder="Type a message" autocomplete="off" />
+        <button id="send-button">Send</button>
+      </footer>
+    </main>
+  </div>
+  <template id="peer-template">
+    <div class="peer">
+      <div class="avatar"></div>
+      <div class="peer-meta">
+        <div class="peer-name"></div>
+        <div class="peer-status"></div>
+      </div>
+      <div class="peer-unread" hidden>0</div>
+    </div>
+  </template>
+  <template id="message-template">
+    <div class="message">
+      <div class="bubble"></div>
+      <div class="meta"></div>
+    </div>
+  </template>
+  <template id="notification-template">
+    <div class="notification-pill">
+      <div class="thumb" hidden></div>
+      <div class="content">
+        <div class="title"></div>
+        <div class="preview"></div>
+      </div>
+      <button class="close">×</button>
+    </div>
+  </template>
+  <script src="https://unpkg.com/p2pt@2.2.3/dist/p2pt.min.js"></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
