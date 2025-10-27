@@ -10,13 +10,7 @@ const STORAGE_KEY = 'flick-display-name';
 const PRESENCE_INTERVAL = 8000;
 const CHUNK_SIZE = 64 * 1024; // 64 KiB
 
-const P2PTConstructor = window.P2PT || globalThis.P2PT;
-
-if (!P2PTConstructor) {
-  throw new Error('P2PT library failed to load.');
-}
-
-const p2pt = new P2PTConstructor(trackers, TOPIC, {trickle: true});
+const p2pt = new P2PT(trackers, TOPIC, {trickle: true});
 
 const state = {
   me: {
